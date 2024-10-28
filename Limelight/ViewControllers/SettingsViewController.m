@@ -16,6 +16,7 @@
 @implementation SettingsViewController {
     NSInteger _bitrate;
     NSInteger _lastSelectedResolutionIndex;
+    NSInteger _controlOpacity;
 }
 
 @dynamic overrideUserInterfaceStyle;
@@ -139,6 +140,8 @@ BOOL isCustomResolution(CGSize res) {
     
     // Ensure we pick a bitrate that falls exactly onto a slider notch
     _bitrate = bitrateTable[[self getSliderValueForBitrate:[currentSettings.bitrate intValue]]];
+    
+    _controlOpacity = [currentSettings.controlOpacity intValue];
 
     // Get the size of the screen with and without safe area insets
     UIWindow *window = UIApplication.sharedApplication.windows.firstObject;
@@ -261,6 +264,9 @@ BOOL isCustomResolution(CGSize res) {
     [self.bitrateSlider setMaximumValue:(sizeof(bitrateTable) / sizeof(*bitrateTable)) - 1];
     [self.bitrateSlider setValue:[self getSliderValueForBitrate:_bitrate] animated:YES];
     [self.bitrateSlider addTarget:self action:@selector(bitrateSliderMoved) forControlEvents:UIControlEventValueChanged];
+    [self.controlOpacitySlider setMinimumValue:0];
+    [self.controlOpacitySlider setMaximumValue:100];
+    [self.controlOpacitySlider addTarget:self action:@selector(controlOpacitySliderMoved) forControlEvents:UIControlEventValueChanged];
     [self updateBitrateText];
     [self updateResolutionDisplayViewText];
 }
@@ -467,6 +473,10 @@ BOOL isCustomResolution(CGSize res) {
     [self.bitrateLabel setText:[NSString stringWithFormat:bitrateFormat, _bitrate / 1000.]];
 }
 
+- (void) controlOpacitySliderMoved {
+    _controlOpacity = self.controlOpacitySlider.value;
+}
+
 - (NSInteger) getChosenFrameRate {
     switch ([self.framerateSelector selectedSegmentIndex]) {
         case 0:
@@ -544,6 +554,7 @@ BOOL isCustomResolution(CGSize res) {
                                width:width
                          audioConfig:2 // Stereo
                     onscreenControls:onscreenControls
+                      controlOpacity:_controlOpacity
                        optimizeGames:optimizeGames
                      multiController:multiController
                      swapABXYButtons:swapABXYButtons

@@ -5,11 +5,13 @@
 //  Created by Diego Waxemberg on 12/28/14.
 //  Copyright (c) 2014 Moonlight Stream. All rights reserved.
 //
+@import AVFoundation;
 
 #import "OnScreenControls.h"
 #import "StreamView.h"
 #import "ControllerSupport.h"
 #import "Controller.h"
+#import "DataManager.h"
 #include "Limelight.h"
 
 #define UPDATE_BUTTON(x, y) (buttonFlags = \
@@ -69,6 +71,8 @@
     Controller *_controller;
     NSMutableArray* _deadTouches;
     BOOL _swapABXY;
+    
+    NSInteger _controlOpacity;
 }
 
 static const float EDGE_WIDTH = .05;
@@ -119,6 +123,9 @@ static float L3_Y;
     _controller = [controllerSupport getOscController];
     _deadTouches = [[NSMutableArray alloc] init];
     _swapABXY = streamConfig.swapABXYButtons;
+    
+    DataManager* dataMan = [[DataManager alloc] init];
+    _controlOpacity = [[dataMan getSettings].controlOpacity intValue];
     
     _iPad = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad);
     _controlArea = CGRectMake(0, 0, _view.frame.size.width, _view.frame.size.height);
@@ -199,6 +206,8 @@ static float L3_Y;
             [self drawTriggers];
             [self drawStartSelect];
             [self drawSticks];
+            
+            [self updateSublayerOpacity];
             break;
         case OnScreenControlsLevelAutoGCExtendedGamepad:
             // GCExtendedGamepad is missing R3, L3, and select
@@ -210,6 +219,8 @@ static float L3_Y;
             [self drawStartSelect];
             [self hideSticks];
             [self drawL3R3];
+            
+            [self updateSublayerOpacity];
             break;
         case OnScreenControlsLevelAutoGCExtendedGamepadWithStickButtons:
             // This variant of GCExtendedGamepad has L3 and R3 but
@@ -222,6 +233,8 @@ static float L3_Y;
             [self hideL3R3];
             [self drawStartSelect];
             [self hideSticks];
+            
+            [self updateSublayerOpacity];
             break;
         case OnScreenControlsLevelSimple:
             [self setupSimpleControls];
@@ -232,6 +245,8 @@ static float L3_Y;
             [self hideSticks];
             [self drawStartSelect];
             [self drawButtons];
+            
+            [self updateSublayerOpacity];
             break;
         case OnScreenControlsLevelFull:
             [self setupComplexControls];
@@ -242,6 +257,8 @@ static float L3_Y;
             [self drawTriggers];
             [self drawSticks];
             [self hideL3R3]; // Full controls don't need these they have the sticks
+            
+            [self updateSublayerOpacity];
             break;
         default:
             Log(LOG_W, @"Unknown on-screen controls level: %d", (int)_level);
@@ -512,6 +529,16 @@ static float L3_Y;
     _r3Button.cornerRadius = r3ButtonImage.size.width / 2;
     _r3Button.borderColor = [UIColor colorWithRed:15.f/255 green:160.f/255 blue:40.f/255 alpha:1.f].CGColor;
     [_view.layer addSublayer:_r3Button];
+}
+
+- (void) updateSublayerOpacity {
+    if (_view.layer.sublayers) {
+        for (CALayer *Sublayer in _view.layer.sublayers) {
+            if (![Sublayer isKindOfClass:[AVSampleBufferDisplayLayer class]]) {
+                Sublayer.opacity = _controlOpacity / 100.0;
+            }
+        }
+    }
 }
 
 - (void) hideButtons {

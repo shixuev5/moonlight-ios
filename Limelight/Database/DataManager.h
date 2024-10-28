@@ -19,6 +19,7 @@
                            width:(NSInteger)width
                 audioConfig:(NSInteger)audioConfig
                 onscreenControls:(NSInteger)onscreenControls
+                  controlOpacity:(NSInteger)controlOpacity
                    optimizeGames:(BOOL)optimizeGames
                  multiController:(BOOL)multiController
                  swapABXYButtons:(BOOL)swapABXYButtons

@@ -24,6 +24,7 @@
 
 # include <stdlib.h>
 # include <time.h>
+# include <sys/_types/_time_t.h>
 
 #include <OpenSSL/e_os2.h>
 
